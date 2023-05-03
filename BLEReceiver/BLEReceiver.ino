@@ -1,13 +1,5 @@
-/**
- * A BLE client example that is rich in capabilities.
- * There is a lot new capabilities implemented.
- * author unknown
- * updated by chegewara
- */
-
 #include <ArduinoBLE.h>
 #include <Wire.h>
-//#include "BLEScan.h"
 
 // The remote service we wish to connect to.
 static char* serviceUUID = "0e913955-814a-4f74-81b9-0d4c309837d1";
