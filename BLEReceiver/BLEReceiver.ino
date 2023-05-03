@@ -11,11 +11,11 @@ void updateSpeedOverI2C(char* buffer){
   int y = atoi(strtok(NULL,","));
   int z = atoi(strtok(NULL,","));
   uint8_t speed;
-  if (y < 0) {
-    speed = 54;
+  if (x < 0) {
+    speed = 60;
   }
   else {
-    speed = (uint8_t)map(y,0,90,54,72);
+    speed = (uint8_t)map(y,0,90,60,90);
   }
    
   Serial.println(speed);
