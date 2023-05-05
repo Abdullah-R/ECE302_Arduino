@@ -4,7 +4,13 @@
  *  - move strings to flash (less RAM consumption)
  *  - fix deprecated convertation form string to char* startAsAnchor
  *  - give example description
+
+ https://electropeak.com/learn/interfacing-dwm1000-positioning-module-with-arduino/
  */
+
+ // This is just example code for DWM that must be integrated into our main stuff.
+
+ 
 #include <SPI.h>
 #include "DW1000Ranging.h"
 
