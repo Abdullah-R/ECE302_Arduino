@@ -14,12 +14,15 @@
 #include <SPI.h>
 #include "DW1000Ranging.h"
 
-// connection pins
 const uint8_t PIN_RST = 9; // reset pin
 const uint8_t PIN_IRQ = 2; // irq pin
 const uint8_t PIN_SS = 10; // spi select pin
+float bias = 0.6;
 
 void setup_DWM() {
+
+  SPI.begin();
+
   DW1000Ranging.initCommunication(PIN_RST, PIN_SS, PIN_IRQ); //Reset, CS, IRQ pin
 
   //define the sketch as anchor. It will be great to dynamically change the type of module
@@ -30,22 +33,24 @@ void setup_DWM() {
   //DW1000Ranging.useRangeFilter(true);
   
   //we start the module as an anchor
-  DW1000Ranging.startAsAnchor("82:17:5B:D5:A9:9A:E2:9C", DW1000.MODE_LONGDATA_RANGE_ACCURACY);
+  DW1000Ranging.startAsAnchor("82:17:5B:D5:A9:9A:E2:9C", DW1000.MODE_LONGDATA_RANGE_LOWPOWER, false);
+  //DW1000Ranging.startAsTag("7D:00:22:EA:82:60:3B:9C", DW1000.MODE_LONGDATA_RANGE_ACCURACY);
   Serial.println("DWM started with Address:");
   byte* addy = DW1000Ranging.getCurrentAddress();
-  for(int i=0; i<sizeof(addy); i++){
-    printHex(addy[i]);
-  }
+  printHexArr(addy, sizeof(addy));
   Serial.println();
 }
 
-void loop_DWM() {
+float loop_DWM() {
   DW1000Ranging.loop();
+  return range;
 }
 
 void newRange() {
   Serial.print("from: "); Serial.print(DW1000Ranging.getDistantDevice()->getShortAddress(), HEX);
-  Serial.print("\t Range: "); Serial.print(DW1000Ranging.getDistantDevice()->getRange()); Serial.print(" m");
+  Serial.print(" -> to: "); printHexArr(DW1000Ranging.getCurrentShortAddress(), 2);
+  range = (DW1000Ranging.getDistantDevice()->getRange() - bias);//)*39.37;//For inches
+  Serial.print("\t Range: "); Serial.print(range); Serial.print(" m");
   Serial.print("\t RX power: "); Serial.print(DW1000Ranging.getDistantDevice()->getRXPower()); Serial.println(" dBm");
 }
 
@@ -60,9 +65,12 @@ void inactiveDevice(DW1000Device* device) {
   Serial.println(device->getShortAddress(), HEX);
 }
 
-void printHex(uint8_t num) {
-  char hexCar[2];
+void printHexArr(byte* arr, int size) {
+  for(int i=size - 1; i>=0; i--){
+    uint8_t num = arr[i];
+    char hexCar[2];
 
-  sprintf(hexCar, "%02X:", num);
-  Serial.print(hexCar);
+    sprintf(hexCar, "%02X", num);
+    Serial.print(hexCar);
+  }
 }

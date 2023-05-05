@@ -1,5 +1,7 @@
 #include <ArduinoBLE.h>
 #include <Wire.h>
+#include <SPI.h>
+#include "DW1000Ranging.h"
 
 // The remote service we wish to connect to.
 static char* serviceUUID = "0e913955-814a-4f74-81b9-0d4c309837d1";
@@ -11,18 +13,21 @@ void updateSpeedOverI2C(char* buffer){
   int y = atoi(strtok(NULL,","));
   int z = atoi(strtok(NULL,","));
   uint8_t speed;
-  if (x < -20) {
-    speed = 60;
+  if (x > 100) {
+    speed = 0;
   }
-  else if (x < 0) {
-    speed = (uint8_t)map(y,-20, 0, 75, 90);
+  else if (x > 20) {
+    speed = 20;
   }
-  else {
-    speed = (uint8_t)map(y,0,90,60,90);
+  else if (x > 0) {
+    speed = (uint8_t)map(x, 0, 20, 60, 30);
   }
-    
-  Serial.println(speed);
-  
+  else if (x >= -93) {
+    speed = (uint8_t)map(x,-90,0,45,60);
+  }
+
+  Serial.print("X: ");Serial.println(x);
+  Serial.print("Speed: ");Serial.println(speed);
   Wire.beginTransmission(8); // transmit to device #4
   Wire.write(speed);              // sends one byte  
   Wire.endTransmission();    // stop transmitting
@@ -31,7 +36,8 @@ void updateSpeedOverI2C(char* buffer){
 
 void setup() {
   Serial.begin(9600);
-  //while (!Serial);
+  //while(!Serial);
+  delay(1000);
 
   Serial.println("Starting Arduino BLE Client application...");
 
@@ -47,7 +53,8 @@ void setup() {
   Wire.begin(); // join i2c bus (address optional for master)
 
   // Initialize DWM Module
-  setup_DWM()
+  SPI.begin();
+  setup_DWM();
 
   Serial.println("Setup Complete");
 
@@ -68,13 +75,11 @@ void loop() {
   {
     char buffer[16];
     BLEService service = wand.service(serviceUUID);
-    Serial.println("Service Acceleration");
     BLECharacteristic accel = service.characteristic(charUUID);
     accel.readValue(buffer, 16);
     updateSpeedOverI2C(buffer);
-    delay(50);
+    loop_DWM();
   }
 
-  loop_DWM();
 
 } // End of loop

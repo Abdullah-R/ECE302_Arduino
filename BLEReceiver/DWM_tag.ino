@@ -29,13 +29,12 @@ void setup_DWM() {
   //Enable the filter to smooth the distance
   //DW1000Ranging.useRangeFilter(true);
   
-  //we start the module as an anchor
-  DW1000Ranging.startAsTag("7D:00:22:EA:82:60:3B:9C", DW1000.MODE_LONGDATA_RANGE_ACCURACY);
+  //we start the module as an tag
+  //DW1000Ranging.startAsAnchor("82:17:5B:D5:A9:9A:E2:9C", DW1000.MODE_LONGDATA_RANGE_ACCURACY);
+  DW1000Ranging.startAsTag("7D:00:22:EA:82:60:3B:9C", DW1000.MODE_LONGDATA_RANGE_LOWPOWER, false);
   Serial.println("DWM started with Address:");
   byte* addy = DW1000Ranging.getCurrentAddress();
-  for(int i=0; i<sizeof(addy); i++){
-    printHex(addy[i]);
-  }
+  printHexArr(addy, sizeof(addy));
   Serial.println();
 }
 
@@ -45,6 +44,7 @@ void loop_DWM() {
 
 void newRange() {
   Serial.print("from: "); Serial.print(DW1000Ranging.getDistantDevice()->getShortAddress(), HEX);
+  Serial.print(" -> to: "); printHexArr(DW1000Ranging.getCurrentShortAddress(), 2);
   Serial.print("\t Range: "); Serial.print(DW1000Ranging.getDistantDevice()->getRange()); Serial.print(" m");
   Serial.print("\t RX power: "); Serial.print(DW1000Ranging.getDistantDevice()->getRXPower()); Serial.println(" dBm");
 }
@@ -60,9 +60,12 @@ void inactiveDevice(DW1000Device* device) {
   Serial.println(device->getShortAddress(), HEX);
 }
 
-void printHex(uint8_t num) {
-  char hexCar[2];
+void printHexArr(byte* arr, int size) {
+  for(int i=size - 1; i>=0; i--){
+    uint8_t num = arr[i];
+    char hexCar[2];
 
-  sprintf(hexCar, "%02X:", num);
-  Serial.print(hexCar);
+    sprintf(hexCar, "%02X", num);
+    Serial.print(hexCar);
+  }
 }

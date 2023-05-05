@@ -5,6 +5,9 @@
 
 // Accelerometer
 float x, y, z;
+float range = 100;
+int prev_prev_xi = -90;
+int prev_xi = -90;
 
 BLEService posService("0e913955-814a-4f74-81b9-0d4c309837d1"); // create service
 
@@ -13,8 +16,7 @@ BLECharacteristic posCharacteristic("c2f1cb79-43f3-4bfc-9e4c-c18a4798ef82", BLER
 
 void setup() {
   Serial.begin(9600);
-  //while (!Serial);
-
+  delay(1000);
   // initialize BLE
   if (!BLE.begin()) {
     Serial.println("starting BLE failed!");
@@ -59,15 +61,28 @@ void loop() {
     IMU.readAcceleration(x, y, z);
 
     int xi = map(x*100, -100, 97, -90, 90);
-    int zi = map(y*100, -100, 97, -90, 90);
-    int yi = map(z*100, -100, 97, -90, 90);
+    int yi = map(y*100, -100, 97, -90, 90);
+    int zi = map(z*100, -100, 97, -90, 90);
 
-    sprintf(buffer, "%i,%i,%i, ", xi, yi, zi);
+    if (xi > 60) {
+      if (range < 1.5) {
+         xi = 1000;
+      }
+    }
+    int xi_avg = (xi + prev_xi + prev_prev_xi) / 3;
+    prev_prev_xi = prev_xi;
+    prev_xi = xi;
 
+    sprintf(buffer, "%i,%i,%i, ", xi_avg, yi, zi);
     Serial.println(buffer);
+    
+
     posCharacteristic.writeValue(buffer, 16, true);
     
   }
-
-  loop_DWM();
+  
+  float new_range = loop_DWM();
+  if (new_range < 15) {
+    range = new_range;
+  }
 }
