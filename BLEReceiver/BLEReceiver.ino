@@ -19,7 +19,7 @@ void updateSpeedOverI2C(char* buffer){
   }
   else {
     speed = (uint8_t)map(y,0,90,60,90);
-  } 
+  }
    
   Serial.println(speed);
   
