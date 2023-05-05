@@ -3,15 +3,8 @@
 #include <SPI.h>
 #include "DW1000Ranging.h"
 
-// Accelerometer values
+// Accelerometer
 float x, y, z;
-
-// connection pins
-const uint8_t PIN_RST = 9; // reset pin
-const uint8_t PIN_IRQ = 2; // irq pin
-const uint8_t PIN_SS = 10; // spi select pin
-
-
 
 BLEService posService("0e913955-814a-4f74-81b9-0d4c309837d1"); // create service
 
@@ -20,7 +13,6 @@ BLECharacteristic posCharacteristic("c2f1cb79-43f3-4bfc-9e4c-c18a4798ef82", BLER
 
 void setup() {
   Serial.begin(9600);
-  delay(1000);
   //while (!Serial);
 
   // initialize BLE
@@ -35,10 +27,8 @@ void setup() {
 
     while (1);
   }
-  
-  //
-  DW1000Ranging.initCommunication(PIN_RST, PIN_SS, PIN_IRQ); //Reset, CS, IRQ pin
 
+  setup_DWM();
 
   // set the local name peripheral advertises
   BLE.setLocalName("MagicWand");
@@ -66,17 +56,18 @@ void loop() {
   char buffer[16];
   
   if (IMU.accelerationAvailable()) {
-      IMU.readAcceleration(x, y, z);
-  
-      int xi = map(x*100, -100, 97, -90, 90);
-      int zi = map(y*100, -100, 97, -90, 90);
-      int yi = map(z*100, -100, 97, -90, 90);
+    IMU.readAcceleration(x, y, z);
 
-      sprintf(buffer, "%i,%i,%i, ", xi, yi, zi);
+    int xi = map(x*100, -100, 97, -90, 90);
+    int zi = map(y*100, -100, 97, -90, 90);
+    int yi = map(z*100, -100, 97, -90, 90);
 
-      Serial.println(buffer);
-      posCharacteristic.writeValue(buffer, 16, true);
-      
-    }
+    sprintf(buffer, "%i,%i,%i, ", xi, yi, zi);
 
+    Serial.println(buffer);
+    posCharacteristic.writeValue(buffer, 16, true);
+    
+  }
+
+  loop_DWM();
 }

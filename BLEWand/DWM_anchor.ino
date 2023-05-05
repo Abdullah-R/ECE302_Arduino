@@ -19,15 +19,8 @@ const uint8_t PIN_RST = 9; // reset pin
 const uint8_t PIN_IRQ = 2; // irq pin
 const uint8_t PIN_SS = 10; // spi select pin
 
-void setup() {
-  Serial.begin(9600);
-  while (!Serial);
-  Serial.println("Delay start");
-  delay(1000);
-  Serial.println("Setup Init");
-  //init the configuration
+void setup_DWM() {
   DW1000Ranging.initCommunication(PIN_RST, PIN_SS, PIN_IRQ); //Reset, CS, IRQ pin
-  Serial.print("Setup Attach");
 
   //define the sketch as anchor. It will be great to dynamically change the type of module
   DW1000Ranging.attachNewRange(newRange);
@@ -36,10 +29,9 @@ void setup() {
   //Enable the filter to smooth the distance
   //DW1000Ranging.useRangeFilter(true);
   
-  Serial.println("Setup Start");
   //we start the module as an anchor
   DW1000Ranging.startAsAnchor("82:17:5B:D5:A9:9A:E2:9C", DW1000.MODE_LONGDATA_RANGE_ACCURACY);
-  Serial.println("Setup Complete");
+  Serial.println("DWM started with Address:");
   byte* addy = DW1000Ranging.getCurrentAddress();
   for(int i=0; i<sizeof(addy); i++){
     printHex(addy[i]);
@@ -47,7 +39,7 @@ void setup() {
   Serial.println();
 }
 
-void loop() {
+void loop_DWM() {
   DW1000Ranging.loop();
 }
 

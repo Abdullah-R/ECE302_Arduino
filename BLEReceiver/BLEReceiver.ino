@@ -45,6 +45,10 @@ void setup() {
   BLE.scanForUuid(serviceUUID);
 
   Wire.begin(); // join i2c bus (address optional for master)
+
+  // Initialize DWM Module
+  setup_DWM()
+
   Serial.println("Setup Complete");
 
 } // End of setup.
@@ -61,14 +65,16 @@ void loop() {
   wand.connect();
   wand.discoverAttributes();
   while (wand)
-    {
-      char buffer[16];
-      BLEService service = wand.service(serviceUUID);
-      Serial.println("Service Acceleration");
-      BLECharacteristic accel = service.characteristic(charUUID);
-      accel.readValue(buffer, 16);
-      updateSpeedOverI2C(buffer);
-      delay(50);
-    }
+  {
+    char buffer[16];
+    BLEService service = wand.service(serviceUUID);
+    Serial.println("Service Acceleration");
+    BLECharacteristic accel = service.characteristic(charUUID);
+    accel.readValue(buffer, 16);
+    updateSpeedOverI2C(buffer);
+    delay(50);
+  }
+
+  loop_DWM();
 
 } // End of loop
