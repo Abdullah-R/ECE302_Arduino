@@ -18,6 +18,8 @@
 const uint8_t PIN_RST = 9; // reset pin
 const uint8_t PIN_IRQ = 2; // irq pin
 const uint8_t PIN_SS = 10; // spi select pin
+float bias = 0.6;
+
 
 void setup_DWM() {
   DW1000Ranging.initCommunication(PIN_RST, PIN_SS, PIN_IRQ); //Reset, CS, IRQ pin
@@ -45,7 +47,11 @@ void loop_DWM() {
 void newRange() {
   Serial.print("from: "); Serial.print(DW1000Ranging.getDistantDevice()->getShortAddress(), HEX);
   Serial.print(" -> to: "); printHexArr(DW1000Ranging.getCurrentShortAddress(), 2);
-  Serial.print("\t Range: "); Serial.print(DW1000Ranging.getDistantDevice()->getRange()); Serial.print(" m");
+  float new_range =   (DW1000Ranging.getDistantDevice()->getRange() - bias);//)*39.37;//For inches
+  if (new_range < 15) {
+    range = new_range;
+  }
+  Serial.print("\t Range: "); Serial.print(range); Serial.print(" m");
   Serial.print("\t RX power: "); Serial.print(DW1000Ranging.getDistantDevice()->getRXPower()); Serial.println(" dBm");
 }
 
